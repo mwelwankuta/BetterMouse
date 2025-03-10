@@ -1,6 +1,7 @@
 #include <iostream>
 #include <windows.h>
 #include <cmath>
+#include <chrono>
 
 // Configuration
 const int MOVEMENT_THRESHOLD = 10;      // Minimum pixels to trigger horizontal actions
@@ -9,6 +10,7 @@ const int SCROLL_SENSITIVITY = 5;       // Mouse wheel sensitivity multiplier
 const int CURSOR_MOVE_STEPS = 20;       // Number of steps for smooth cursor movement
 const int CURSOR_MOVE_DELAY = 1;        // Milliseconds between each cursor movement step
 const int SLOW_MOUSE_SPEED = 4;         // Mouse speed when action button held (1-20, where 10 is normal)
+const double VERTICAL_COOLDOWN = 1500.0; // Cooldown for vertical actions in milliseconds (1.5 seconds)
 
 // Command types enum
 enum class ActiveCommand {
@@ -32,6 +34,8 @@ struct {
     bool isReturningToOrigin = false; // Whether cursor is currently returning to origin
     POINT lastPos = {0, 0};        // Last position before releasing action button
     int originalMouseSpeed = 10;    // Store original mouse speed
+    std::chrono::steady_clock::time_point lastUpwardActionTime = std::chrono::steady_clock::now();  // Last time upward action was triggered
+    std::chrono::steady_clock::time_point lastDownwardActionTime = std::chrono::steady_clock::now();  // Last time downward action was triggered
 } state;
 
 // Forward declarations
@@ -59,7 +63,27 @@ void performVirtualDesktopSwitch(bool goRight) {
     }
 }
 
+bool checkVerticalCooldown(bool isUpward) {
+    auto currentTime = std::chrono::steady_clock::now();
+    auto& lastActionTime = isUpward ? state.lastUpwardActionTime : state.lastDownwardActionTime;
+    
+    auto timeSinceLastAction = std::chrono::duration_cast<std::chrono::milliseconds>(
+        currentTime - lastActionTime).count();
+    
+    if (timeSinceLastAction < VERTICAL_COOLDOWN) {
+        return false; // Still in cooldown
+    }
+    
+    lastActionTime = currentTime;
+    return true;
+}
+
 void performWindowsTabView() {
+    // Check cooldown for upward action
+    if (!checkVerticalCooldown(true)) {
+        return;
+    }
+
     // Only perform if no other command is active or if continuing Windows+Tab
     if (state.currentCommand == ActiveCommand::NONE || 
         state.currentCommand == ActiveCommand::WINDOWS_TAB_UP) {
@@ -74,6 +98,11 @@ void performWindowsTabView() {
 }
 
 void performShowDesktopOrWindowsTab() {
+    // Check cooldown for downward action
+    if (!checkVerticalCooldown(false)) {
+        return;
+    }
+
     // Only perform if no other command is active or if continuing the same command
     if (state.currentCommand == ActiveCommand::NONE || 
         state.currentCommand == ActiveCommand::SHOW_DESKTOP_OR_TAB_DOWN) {
