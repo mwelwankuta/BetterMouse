@@ -43,3 +43,16 @@ mouse_gestures.exe
 .Trashes
 ehthumbs.db
 Thumbs.db
+
+
+# build folder
+build/
+
+# cmake files
+CMakeCache.txt
+cmake_install.cmake
+CMakeFiles/
+Makefile
+cmake_uninstall.cmake
+cmake_uninstall.cmake.in
+
