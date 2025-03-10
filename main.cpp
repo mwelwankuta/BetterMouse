@@ -225,9 +225,9 @@ void handleMouseMovement(const POINT& currentPos) {
         if (horizontalThresholdMet && abs(deltaX) > abs(deltaY)) {
             // Horizontal movement
             if (deltaX > 0) {
-                performVirtualDesktopSwitch(true);  // Right
+                performVirtualDesktopSwitch(false);  // Moving right now triggers Left
             } else {
-                performVirtualDesktopSwitch(false); // Left
+                performVirtualDesktopSwitch(true);   // Moving left now triggers Right
             }
         } else {
             // Vertical movement
