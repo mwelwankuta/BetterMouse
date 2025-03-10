@@ -3,11 +3,12 @@
 #include <cmath>
 
 // Configuration
-const int MOVEMENT_THRESHOLD = 10;  // Minimum pixels to trigger directional actions
-const int SCROLL_SENSITIVITY = 5;   // Mouse wheel sensitivity multiplier
-const int CURSOR_MOVE_STEPS = 20;   // Number of steps for smooth cursor movement
-const int CURSOR_MOVE_DELAY = 1;    // Milliseconds between each cursor movement step
-const int SLOW_MOUSE_SPEED = 4;     // Mouse speed when action button held (1-20, where 10 is normal)
+const int MOVEMENT_THRESHOLD = 10;      // Minimum pixels to trigger horizontal actions
+const int VERTICAL_THRESHOLD = 5;       // More sensitive threshold for up/down actions
+const int SCROLL_SENSITIVITY = 5;       // Mouse wheel sensitivity multiplier
+const int CURSOR_MOVE_STEPS = 20;       // Number of steps for smooth cursor movement
+const int CURSOR_MOVE_DELAY = 1;        // Milliseconds between each cursor movement step
+const int SLOW_MOUSE_SPEED = 4;         // Mouse speed when action button held (1-20, where 10 is normal)
 
 // Command types enum
 enum class ActiveCommand {
@@ -172,13 +173,17 @@ void handleMouseMovement(const POINT& currentPos) {
     int deltaX = currentPos.x - state.initialPos.x;
     int deltaY = currentPos.y - state.initialPos.y;
 
+    // Use different thresholds for horizontal and vertical movements
+    bool horizontalThresholdMet = abs(deltaX) > MOVEMENT_THRESHOLD;
+    bool verticalThresholdMet = abs(deltaY) > VERTICAL_THRESHOLD;
+
     // Only trigger if movement exceeds threshold
-    if (abs(deltaX) > MOVEMENT_THRESHOLD || abs(deltaY) > MOVEMENT_THRESHOLD) {
+    if (horizontalThresholdMet || verticalThresholdMet) {
         // Store current position
         state.lastPos = currentPos;
         
         // Determine primary direction of movement
-        if (abs(deltaX) > abs(deltaY)) {
+        if (horizontalThresholdMet && abs(deltaX) > abs(deltaY)) {
             // Horizontal movement
             if (deltaX > 0) {
                 performVirtualDesktopSwitch(true);  // Right
