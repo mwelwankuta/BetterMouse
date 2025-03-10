@@ -5,6 +5,8 @@
 // Configuration
 const int MOVEMENT_THRESHOLD = 20;  // Minimum pixels to trigger directional actions
 const int SCROLL_SENSITIVITY = 5;   // Mouse wheel sensitivity multiplier
+const int CURSOR_MOVE_STEPS = 20;   // Number of steps for smooth cursor movement
+const int CURSOR_MOVE_DELAY = 1;    // Milliseconds between each cursor movement step
 
 // Command types enum
 enum class ActiveCommand {
@@ -25,6 +27,8 @@ struct {
     POINT lockedPos = {0, 0};      // Position where cursor is locked
     bool altTabActive = false;     // Whether Alt+Tab is currently being held
     ActiveCommand currentCommand = ActiveCommand::NONE;  // Currently active command
+    bool isReturningToOrigin = false; // Whether cursor is currently returning to origin
+    POINT lastPos = {0, 0};        // Last position before releasing action button
 } state;
 
 // Forward declarations
@@ -130,15 +134,47 @@ void performAltTab(bool goRight = true) {
     startAltTab(goRight);
 }
 
+// Smooth cursor movement
+void moveCursorSmoothly(const POINT& from, const POINT& to) {
+    state.isReturningToOrigin = true;
+    
+    for (int step = 1; step <= CURSOR_MOVE_STEPS; step++) {
+        if (!state.actionButtonDown) {
+            break; // Stop if action button is released
+        }
+        
+        // Calculate intermediate position
+        POINT currentPos;
+        currentPos.x = from.x + ((to.x - from.x) * step) / CURSOR_MOVE_STEPS;
+        currentPos.y = from.y + ((to.y - from.y) * step) / CURSOR_MOVE_STEPS;
+        
+        // Move cursor
+        SetCursorPos(currentPos.x, currentPos.y);
+        
+        // Small delay for smooth movement
+        Sleep(CURSOR_MOVE_DELAY);
+    }
+    
+    // Ensure we reach the exact destination
+    if (state.actionButtonDown) {
+        SetCursorPos(to.x, to.y);
+    }
+    
+    state.isReturningToOrigin = false;
+}
+
 // Mouse movement handling
 void handleMouseMovement(const POINT& currentPos) {
-    if (!state.actionButtonDown) return;
+    if (!state.actionButtonDown || state.isReturningToOrigin) return;
 
     int deltaX = currentPos.x - state.initialPos.x;
     int deltaY = currentPos.y - state.initialPos.y;
 
     // Only trigger if movement exceeds threshold
     if (abs(deltaX) > MOVEMENT_THRESHOLD || abs(deltaY) > MOVEMENT_THRESHOLD) {
+        // Store current position
+        state.lastPos = currentPos;
+        
         // Determine primary direction of movement
         if (abs(deltaX) > abs(deltaY)) {
             // Horizontal movement
@@ -155,8 +191,9 @@ void handleMouseMovement(const POINT& currentPos) {
                 performWindowsTabView();          // Up
             }
         }
+        
         // Reset initial position after action
-        state.initialPos = currentPos;
+        state.initialPos = state.initialPos; // Keep the original position
     }
 }
 
@@ -189,6 +226,11 @@ LRESULT CALLBACK LowLevelMouseProc(int nCode, WPARAM wParam, LPARAM lParam) {
             case WM_XBUTTONUP:
                 if (HIWORD(mouseInfo->mouseData) == XBUTTON2) {  // Mouse Button 5
                     state.actionButtonDown = false;
+                    // Get current position before moving
+                    POINT currentPos;
+                    GetCursorPos(&currentPos);
+                    // Always return to initial position
+                    moveCursorSmoothly(currentPos, state.initialPos);
                     unlockCursor();
                     releaseAltTab(); // Release any held Alt+Tab combinations
                     state.currentCommand = ActiveCommand::NONE;  // Reset active command
@@ -196,11 +238,10 @@ LRESULT CALLBACK LowLevelMouseProc(int nCode, WPARAM wParam, LPARAM lParam) {
                 break;
 
             case WM_MOUSEMOVE:
-                if (state.actionButtonDown) {
+                if (state.actionButtonDown && !state.isReturningToOrigin) {
                     POINT currentPos;
                     GetCursorPos(&currentPos);
                     handleMouseMovement(currentPos);
-                    lockCursor();  // Keep cursor locked while action button is held
                 }
                 break;
 
