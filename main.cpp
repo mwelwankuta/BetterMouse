@@ -2,6 +2,17 @@
 #include <windows.h>
 #include <cmath>
 #include <chrono>
+#include <shellapi.h> // For system tray
+#include "resource.h" // For icon resources
+
+#define WM_TRAYICON (WM_USER + 1)
+#define ID_TRAYICON 1
+#define ID_EXIT 1000
+
+NOTIFYICONDATA nid = {};
+HMENU hPopMenu;
+WNDCLASSEX wc = {};
+HWND hWnd;
 
 // Configuration
 const int MOVEMENT_THRESHOLD = 10;      // Minimum pixels to trigger horizontal actions
@@ -307,11 +318,113 @@ LRESULT CALLBACK LowLevelMouseProc(int nCode, WPARAM wParam, LPARAM lParam) {
     return CallNextHookEx(NULL, nCode, wParam, lParam);
 }
 
-int main() {
+// Function declarations for window procedure
+LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+void CreateTrayIcon(HWND hwnd);
+void ShowContextMenu(HWND hwnd);
+void AddToStartup();
+
+// Add to Windows startup
+void AddToStartup() {
+    TCHAR szPath[MAX_PATH];
+    GetModuleFileName(NULL, szPath, MAX_PATH);
+    
+    HKEY hKey;
+    LPCTSTR keyPath = TEXT("Software\\Microsoft\\Windows\\CurrentVersion\\Run");
+    RegOpenKeyEx(HKEY_CURRENT_USER, keyPath, 0, KEY_SET_VALUE, &hKey);
+    RegSetValueEx(hKey, TEXT("MouseGestures"), 0, REG_SZ, (BYTE*)szPath, (strlen(szPath) + 1) * sizeof(TCHAR));
+    RegCloseKey(hKey);
+}
+
+// Create hidden window for system tray
+HWND CreateHiddenWindow(HINSTANCE hInstance) {
+    wc.cbSize = sizeof(WNDCLASSEX);
+    wc.lpfnWndProc = WindowProc;
+    wc.hInstance = hInstance;
+    wc.lpszClassName = TEXT("MouseGesturesClass");
+    
+    RegisterClassEx(&wc);
+    
+    return CreateWindowEx(
+        0,
+        TEXT("MouseGesturesClass"),
+        TEXT("Mouse Gestures"),
+        WS_OVERLAPPEDWINDOW,
+        CW_USEDEFAULT, CW_USEDEFAULT,
+        CW_USEDEFAULT, CW_USEDEFAULT,
+        NULL,
+        NULL,
+        hInstance,
+        NULL
+    );
+}
+
+// Create system tray icon
+void CreateTrayIcon(HWND hwnd) {
+    nid.cbSize = sizeof(NOTIFYICONDATA);
+    nid.hWnd = hwnd;
+    nid.uID = ID_TRAYICON;
+    nid.uFlags = NIF_ICON | NIF_MESSAGE | NIF_TIP;
+    nid.uCallbackMessage = WM_TRAYICON;
+    nid.hIcon = LoadIcon(GetModuleHandle(NULL), MAKEINTRESOURCE(IDI_TRAYICON));
+    strcpy(nid.szTip, "Mouse Gestures (Right-click to exit)");
+    
+    Shell_NotifyIcon(NIM_ADD, &nid);
+}
+
+// Show context menu
+void ShowContextMenu(HWND hwnd) {
+    POINT pt;
+    GetCursorPos(&pt);
+    
+    hPopMenu = CreatePopupMenu();
+    InsertMenu(hPopMenu, 0, MF_BYPOSITION | MF_STRING, ID_EXIT, TEXT("Exit"));
+    
+    SetForegroundWindow(hwnd);
+    TrackPopupMenu(hPopMenu, TPM_BOTTOMALIGN | TPM_LEFTALIGN, pt.x, pt.y, 0, hwnd, NULL);
+}
+
+// Window procedure
+LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
+    switch (uMsg) {
+        case WM_TRAYICON:
+            if (lParam == WM_RBUTTONUP) {
+                ShowContextMenu(hwnd);
+            }
+            break;
+            
+        case WM_COMMAND:
+            if (LOWORD(wParam) == ID_EXIT) {
+                Shell_NotifyIcon(NIM_DELETE, &nid);
+                PostQuitMessage(0);
+            }
+            break;
+            
+        case WM_DESTROY:
+            Shell_NotifyIcon(NIM_DELETE, &nid);
+            PostQuitMessage(0);
+            break;
+    }
+    return DefWindowProc(hwnd, uMsg, wParam, lParam);
+}
+
+// Windows entry point
+int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) {
+    // Create hidden window and system tray icon
+    hWnd = CreateHiddenWindow(hInstance);
+    if (!hWnd) {
+        MessageBoxA(NULL, "Failed to create window!", "Error", MB_ICONERROR);
+        return 1;
+    }
+    
+    CreateTrayIcon(hWnd);
+    AddToStartup();
+
     // Set up mouse hook
     HHOOK mouseHook = SetWindowsHookEx(WH_MOUSE_LL, LowLevelMouseProc, NULL, 0);
     if (mouseHook == NULL) {
-        std::cerr << "Failed to set the mouse hook!" << std::endl;
+        MessageBoxA(NULL, "Failed to set the mouse hook!", "Error", MB_ICONERROR);
+        Shell_NotifyIcon(NIM_DELETE, &nid);
         return 1;
     }
 
@@ -325,9 +438,10 @@ int main() {
         DispatchMessage(&msg);
     }
 
-    // Cleanup - ensure mouse speed is restored
+    // Cleanup
     setMouseSpeed(state.originalMouseSpeed);
     UnhookWindowsHookEx(mouseHook);
+    Shell_NotifyIcon(NIM_DELETE, &nid);
 
     return 0;
 }

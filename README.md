@@ -1,111 +1,98 @@
-# Mouse Gestures
+# Mouse Gestures for Windows
 
-A C++ application for detecting and handling mouse gestures.
+A Windows application that provides mouse gesture functionality for quick navigation between windows, virtual desktops, and more.
 
-## Description
+## Features
 
-This project implements mouse gesture recognition functionality, allowing users to perform actions by drawing patterns with their mouse movements.
+- Mouse gesture support using Mouse Button 5 (XButton2)
+- System tray icon with settings and about menu
+- Can run as a normal application or Windows service
+- Professional installer with options for service or normal installation
+- Automatic startup support
+- Gesture actions:
+  - Horizontal movement: Switch virtual desktops
+  - Vertical movement up: Windows Tab view
+  - Vertical movement down: Show desktop/Windows Tab
+  - Mouse wheel while holding action button: Alt+Tab switching
 
-## Mouse Commands (Supports both mice with side buttons )
+## Installation
 
-### Basic Commands
+### Using the Installer (Recommended)
 
-The Action button by default is mouse button 5, though can be changed to mouse button 2
-1. **Action + Mouse Wheel Up / Mouse Wheel Down**
-   - Action: Switch between windows ( (Hold Alt) +Tab, While Holding Alt Right)
-   - Description: Hold the right mouse button and scroll the wheel up to switch between open applications
-   - Note: If i was previously moving left and right is clicked instead of running the entire action + mouse wheel up action, just replace the right with left in the command so it feels like Ctrl + Alt, Left / Or
+1. Download the latest `MouseGestures_Setup_1.0.0.exe` from the releases page
+2. Run the installer as Administrator
+3. Choose your installation options:
+   - Install as Windows Service (runs at startup)
+   - Install as normal application
+   - Create desktop shortcut
+   - Create Quick Launch icon
+4. Follow the installation wizard
+5. The application will start automatically after installation
 
-1. **Action + Mouse Wheel Up / Mouse Wheel Down**
-   - Action: Switch between windows ( (Hold Alt) + Tab, While Holding Alt Left)
-   - Description: Hold the right mouse button and scroll the wheel up to switch between open applications
+### Manual Installation
 
-2. **Action + Move Mouse Downwards**
-   - Action: Windows + Tab if no window focused otherwise Show Desktop (Windows+D)
-   - Description: Hold the right mouse button and scroll the wheel down to minimize all windows and show the desktop
+If you prefer not to use the installer:
 
-3. **Action + Move Mouse Upwards**
-   - Action: Switch between windows (Windows+Tab)
-   - Description: Hold left and right mouse buttons simultaneously to switch between open applications
+1. Download the ZIP file from the releases page
+2. Extract to your preferred location
+3. Run `MouseGestures.exe` directly
+4. Optionally, run `install_service.bat install` as Administrator to install as a service
 
-3. **Action + Move Mouse Leftwards**
-   - Action: Switch between windows (Windows+Ctrl+Left)
-   - Description: Hold action button and drag mouse towards the left to switch between virtual desktops
+## Usage
 
-3. **Action + Move Mouse Rightwards**
-   - Action: Switch between windows (Windows+Ctrl+Right)
-   - Description: Hold action button and drag mouse towards the right to switch between virtual desktops
+1. Hold Mouse Button 5 (XButton2) to activate gesture mode
+2. While holding:
+   - Move mouse left/right to switch virtual desktops
+   - Move mouse up to open Windows Tab view
+   - Move mouse down to show desktop or Windows Tab
+   - Use mouse wheel to Alt+Tab between windows
+3. Release Mouse Button 5 to complete the gesture
 
-### Notes
-- The mouse wheel sensitivity is automatically adjusted when the application starts
-- The original mouse wheel sensitivity is restored when the application closes
-- All commands work system-wide once the application is running
+## System Requirements
 
-## Prerequisites
+- Windows 10 or later
+- Administrator privileges (for installation)
+- Microsoft Visual C++ Redistributable 2022 (included in installer)
 
-- C++ compiler (supporting C++11 or later)
-- CMake (version 3.10 or later)
-- GNU Make (for Makefile build)
-- Code::Blocks IDE (optional)
+## Building from Source
 
-## Building the Project
+1. Ensure you have Visual Studio 2022 with C++ desktop development tools installed
+2. Install Inno Setup 6 or later (for building the installer)
+3. Open the solution in Visual Studio
+4. Build the solution in Release mode
+5. Run `iscc installer.iss` to create the installer
 
-### Using CMake (Recommended)
-```bash
-# Create a build directory
-mkdir build
-cd build
+### Building the Installer
 
-# Configure the project
-cmake ..
+1. Install Inno Setup 6 or later
+2. Open `installer.iss` in Inno Setup
+3. Click Build > Compile
+4. The installer will be created in the `installer_output` directory
 
-# Build the project
-cmake --build .
+## Troubleshooting
 
-# The executable will be in build/bin/mouse_gestures
-```
+If the application fails to start:
+1. Check Windows Event Viewer for error messages
+2. Ensure you have administrator privileges
+3. Verify Microsoft Visual C++ Redistributable 2022 is installed
+4. Try running as a normal application first to verify functionality
 
-### Using Make
-```bash
-# Build the project
-make
+For service installation issues:
+1. Open Services (services.msc)
+2. Check if "Mouse Gestures Service" exists and its status
+3. Try stopping and starting the service manually
+4. Check service logs in Event Viewer
 
-# Clean build files
-make clean
+## Uninstallation
 
-# Rebuild everything
-make rebuild
+1. Use Windows Settings > Apps > Apps & features
+2. Find "Mouse Gestures" and click Uninstall
+3. Follow the uninstallation wizard
 
-# The executable will be in bin/mouse_gestures
-```
-
-### Using Code::Blocks
-1. Open the project file in Code::Blocks
-2. Build and run the project using the IDE
-
-### Manual Build
-```bash
-g++ -o mouse_gestures mouse\ gestures.cpp main.cpp -std=c++11
-```
-
-## Project Structure
-
-- `mouse gestures.cpp` - Main gesture recognition implementation
-- `main.cpp` - Program entry point
-- `mouse files.c` - Additional mouse handling functionality
-- `CMakeLists.txt` - CMake build configuration
-- `Makefile` - Make build configuration
-- `.gitignore` - Git ignore rules
-- `LICENSE` - MIT License file
-
-## Contributing
-
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add some amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+Or:
+1. Run the uninstaller directly from the installation directory
+2. The uninstaller will automatically stop and remove the service if installed
 
 ## License
 
-This project is licensed under the MIT License - see the LICENSE file for details. 
+This software is open-source and free to use. 

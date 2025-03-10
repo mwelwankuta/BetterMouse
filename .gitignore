@@ -24,8 +24,6 @@ obj/
 
 # Executables
 *.exe
-mouse_gestures
-mouse_gestures.exe
 
 # IDE specific files
 .vscode/
