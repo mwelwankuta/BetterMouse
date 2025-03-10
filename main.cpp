@@ -3,10 +3,11 @@
 #include <cmath>
 
 // Configuration
-const int MOVEMENT_THRESHOLD = 20;  // Minimum pixels to trigger directional actions
+const int MOVEMENT_THRESHOLD = 10;  // Minimum pixels to trigger directional actions
 const int SCROLL_SENSITIVITY = 5;   // Mouse wheel sensitivity multiplier
 const int CURSOR_MOVE_STEPS = 20;   // Number of steps for smooth cursor movement
 const int CURSOR_MOVE_DELAY = 1;    // Milliseconds between each cursor movement step
+const int SLOW_MOUSE_SPEED = 4;     // Mouse speed when action button held (1-20, where 10 is normal)
 
 // Command types enum
 enum class ActiveCommand {
@@ -29,6 +30,7 @@ struct {
     ActiveCommand currentCommand = ActiveCommand::NONE;  // Currently active command
     bool isReturningToOrigin = false; // Whether cursor is currently returning to origin
     POINT lastPos = {0, 0};        // Last position before releasing action button
+    int originalMouseSpeed = 10;    // Store original mouse speed
 } state;
 
 // Forward declarations
@@ -210,6 +212,11 @@ void unlockCursor() {
     state.isLocked = false;
 }
 
+// Mouse speed control
+void setMouseSpeed(int speed) {
+    SystemParametersInfo(SPI_SETMOUSESPEED, 0, (PVOID)speed, SPIF_SENDCHANGE);
+}
+
 // Mouse hook callback
 LRESULT CALLBACK LowLevelMouseProc(int nCode, WPARAM wParam, LPARAM lParam) {
     if (nCode == HC_ACTION) {
@@ -220,6 +227,9 @@ LRESULT CALLBACK LowLevelMouseProc(int nCode, WPARAM wParam, LPARAM lParam) {
                 if (HIWORD(mouseInfo->mouseData) == XBUTTON2) {  // Mouse Button 5
                     state.actionButtonDown = true;
                     GetCursorPos(&state.initialPos);
+                    // Store current mouse speed and set to slow
+                    SystemParametersInfo(SPI_GETMOUSESPEED, 0, &state.originalMouseSpeed, 0);
+                    setMouseSpeed(SLOW_MOUSE_SPEED);
                 }
                 break;
 
@@ -234,6 +244,8 @@ LRESULT CALLBACK LowLevelMouseProc(int nCode, WPARAM wParam, LPARAM lParam) {
                     unlockCursor();
                     releaseAltTab(); // Release any held Alt+Tab combinations
                     state.currentCommand = ActiveCommand::NONE;  // Reset active command
+                    // Restore original mouse speed
+                    setMouseSpeed(state.originalMouseSpeed);
                 }
                 break;
 
@@ -272,6 +284,9 @@ int main() {
     SystemParametersInfo(SPI_GETWHEELSCROLLLINES, 0, &originalScrollLines, 0);
     SystemParametersInfo(SPI_SETWHEELSCROLLLINES, SCROLL_SENSITIVITY * originalScrollLines, NULL, SPIF_SENDCHANGE);
 
+    // Get initial mouse speed
+    SystemParametersInfo(SPI_GETMOUSESPEED, 0, &state.originalMouseSpeed, 0);
+
     // Message loop
     MSG msg;
     while (GetMessage(&msg, NULL, 0, 0) > 0) {
@@ -279,7 +294,8 @@ int main() {
         DispatchMessage(&msg);
     }
 
-    // Cleanup
+    // Cleanup - ensure mouse speed is restored
+    setMouseSpeed(state.originalMouseSpeed);
     SystemParametersInfo(SPI_SETWHEELSCROLLLINES, originalScrollLines, NULL, SPIF_SENDCHANGE);
     UnhookWindowsHookEx(mouseHook);
 
