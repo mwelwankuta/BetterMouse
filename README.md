@@ -1,98 +1,62 @@
-# Mouse Gestures for Windows
+# Better Mouse - Simple Navigation for Windows
 
-A Windows application that provides mouse gesture functionality for quick navigation between windows, virtual desktops, and more.
+A simple Windows app that lets you navigate between windows and desktops using mouse gestures.
 
-## Features
+## What It Does
 
-- Mouse gesture support using Mouse Button 5 (XButton2)
-- System tray icon with settings and about menu
-- Can run as a normal application or Windows service
-- Professional installer with options for service or normal installation
-- Automatic startup support
-- Gesture actions:
-  - Horizontal movement: Switch virtual desktops
-  - Vertical movement up: Windows Tab view
-  - Vertical movement down: Show desktop/Windows Tab
-  - Mouse wheel while holding action button: Alt+Tab switching
+- Switch between windows and desktops by holding your mouse button and moving
+- Lives quietly in your system tray until you need it
+- Starts automatically with Windows if you want
+- Super easy to use - just hold, move, and release
 
-## Installation
+## Getting Started
 
-### Using the Installer (Recommended)
+### Easy Install (Recommended)
 
-1. Download the latest `MouseGestures_Setup_1.0.0.exe` from the releases page
-2. Run the installer as Administrator
-3. Choose your installation options:
-   - Install as Windows Service (runs at startup)
-   - Install as normal application
-   - Create desktop shortcut
-   - Create Quick Launch icon
-4. Follow the installation wizard
-5. The application will start automatically after installation
+1. Download the latest installer from our releases page
+2. Run the installer 
+3. Choose if you want it to:
+   - Start with Windows
+   - Add a desktop shortcut
+4. Click Install and you're ready to go!
 
-### Manual Installation
+### Using the App
 
-If you prefer not to use the installer:
-
-1. Download the ZIP file from the releases page
-2. Extract to your preferred location
-3. Run `MouseGestures.exe` directly
-4. Optionally, run `install_service.bat install` as Administrator to install as a service
-
-## Usage
-
-1. Hold Mouse Button 5 (XButton2) to activate gesture mode
+1. Hold the side button on your mouse (usually near your thumb)
 2. While holding:
-   - Move mouse left/right to switch virtual desktops
-   - Move mouse up to open Windows Tab view
-   - Move mouse down to show desktop or Windows Tab
-   - Use mouse wheel to Alt+Tab between windows
-3. Release Mouse Button 5 to complete the gesture
+   - Move left/right to switch between desktops
+   - Move up to see all open windows
+   - Move down to show your desktop
+   - Scroll the wheel to switch between windows
+3. Let go of the button when you're done
 
-## System Requirements
+## Requirements
 
-- Windows 10 or later
-- Administrator privileges (for installation)
-- Microsoft Visual C++ Redistributable 2022 (included in installer)
+- Windows 10 or newer
+- Administrator rights to install
 
-## Building from Source
+## Need Help?
 
-1. Ensure you have Visual Studio 2022 with C++ desktop development tools installed
-2. Install Inno Setup 6 or later (for building the installer)
-3. Open the solution in Visual Studio
-4. Build the solution in Release mode
-5. Run `iscc installer.iss` to create the installer
+If the app isn't working:
+1. Make sure you ran the installer as administrator
+2. Try restarting your computer
+3. Check if it appears in your system tray (bottom right corner)
 
-### Building the Installer
+## Removing the App
 
-1. Install Inno Setup 6 or later
-2. Open `installer.iss` in Inno Setup
-3. Click Build > Compile
-4. The installer will be created in the `installer_output` directory
+Option 1:
+1. Go to Windows Settings > Apps > Apps & features
+2. Find "Better Mouse" and click Uninstall
 
-## Troubleshooting
+Option 2:
+1. Right-click the system tray icon
+2. Click "Exit"
+3. Go to your installation folder and run the uninstaller
 
-If the application fails to start:
-1. Check Windows Event Viewer for error messages
-2. Ensure you have administrator privileges
-3. Verify Microsoft Visual C++ Redistributable 2022 is installed
-4. Try running as a normal application first to verify functionality
+## Questions or Problems?
 
-For service installation issues:
-1. Open Services (services.msc)
-2. Check if "Mouse Gestures Service" exists and its status
-3. Try stopping and starting the service manually
-4. Check service logs in Event Viewer
-
-## Uninstallation
-
-1. Use Windows Settings > Apps > Apps & features
-2. Find "Mouse Gestures" and click Uninstall
-3. Follow the uninstallation wizard
-
-Or:
-1. Run the uninstaller directly from the installation directory
-2. The uninstaller will automatically stop and remove the service if installed
+Visit our GitHub page for help and updates. We're here to help make your Windows navigation smoother and easier!
 
 ## License
 
-This software is open-source and free to use. 
+Free to use and share! See LICENSE file for details.
