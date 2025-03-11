@@ -21,6 +21,7 @@ const int CURSOR_MOVE_STEPS = 20;       // Number of steps for smooth cursor mov
 const int CURSOR_MOVE_DELAY = 1;        // Milliseconds between each cursor movement step
 const int SLOW_MOUSE_SPEED = 4;         // Mouse speed when action button held (1-20, where 10 is normal)
 const double VERTICAL_COOLDOWN = 1500.0; // Cooldown for vertical actions in milliseconds (1.5 seconds)
+const double HORIZONTAL_COOLDOWN = 500.0; // Cooldown for horizontal actions in milliseconds (0.5 seconds)
 
 // Command types enum
 enum class ActiveCommand {
@@ -46,6 +47,7 @@ struct {
     int originalMouseSpeed = 10;    // Store original mouse speed
     std::chrono::steady_clock::time_point lastUpwardActionTime = std::chrono::steady_clock::now();  // Last time upward action was triggered
     std::chrono::steady_clock::time_point lastDownwardActionTime = std::chrono::steady_clock::now();  // Last time downward action was triggered
+    std::chrono::steady_clock::time_point lastHorizontalActionTime = std::chrono::steady_clock::now(); // Last time horizontal action was triggered
 } state;
 
 // Forward declarations
@@ -55,11 +57,33 @@ void lockCursor();
 void unlockCursor();
 void startAltTab(bool goRight);
 void releaseAltTab();
+bool checkHorizontalCooldown();
+bool checkVerticalCooldown(bool isUpward);
+
+// Cooldown check functions
+bool checkHorizontalCooldown() {
+    auto currentTime = std::chrono::steady_clock::now();
+    auto timeSinceLastAction = std::chrono::duration_cast<std::chrono::milliseconds>(
+        currentTime - state.lastHorizontalActionTime).count();
+    
+    if (timeSinceLastAction < HORIZONTAL_COOLDOWN) {
+        return false; // Still in cooldown
+    }
+    
+    state.lastHorizontalActionTime = currentTime;
+    return true;
+}
 
 // Mouse actions
 void performVirtualDesktopSwitch(bool goRight) {
+    // Check horizontal cooldown
+    if (!checkHorizontalCooldown()) {
+        return;
+    }
+
     // Only perform if no other command is active or if we're continuing the same direction
     ActiveCommand newCommand = goRight ? ActiveCommand::VIRTUAL_DESKTOP_RIGHT : ActiveCommand::VIRTUAL_DESKTOP_LEFT;
+    
     if (state.currentCommand == ActiveCommand::NONE || state.currentCommand == newCommand) {
         state.currentCommand = newCommand;
         
