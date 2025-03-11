@@ -391,9 +391,18 @@ void CreateTrayIcon(HWND hwnd) {
     nid.uID = ID_TRAYICON;
     nid.uFlags = NIF_ICON | NIF_MESSAGE | NIF_TIP;
     nid.uCallbackMessage = WM_TRAYICON;
-    nid.hIcon = LoadIcon(GetModuleHandle(NULL), MAKEINTRESOURCE(IDI_TRAYICON));
+    
+    // Load the icon from resources
+    HICON hIcon = LoadIcon(GetModuleHandle(NULL), MAKEINTRESOURCE(IDI_ICON1));
+    if (hIcon == NULL) {
+        // Fallback to loading from file if resource loading fails
+        hIcon = (HICON)LoadImage(NULL, "app.ico", IMAGE_ICON, 0, 0, LR_LOADFROMFILE);
+    }
+    
+    nid.hIcon = hIcon;
     strcpy(nid.szTip, "Mouse Gestures (Right-click to exit)");
     
+    // Add the icon to the system tray
     Shell_NotifyIcon(NIM_ADD, &nid);
 }
 
@@ -420,14 +429,19 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
             
         case WM_COMMAND:
             if (LOWORD(wParam) == ID_EXIT) {
-                Shell_NotifyIcon(NIM_DELETE, &nid);
-                PostQuitMessage(0);
+                DestroyWindow(hwnd);
             }
             break;
             
         case WM_DESTROY:
+            // Remove the tray icon when the window is destroyed
             Shell_NotifyIcon(NIM_DELETE, &nid);
             PostQuitMessage(0);
+            break;
+            
+        case WM_CREATE:
+            // Create the tray icon when the window is created
+            CreateTrayIcon(hwnd);
             break;
     }
     return DefWindowProc(hwnd, uMsg, wParam, lParam);
@@ -442,14 +456,13 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
         return 1;
     }
     
-    CreateTrayIcon(hWnd);
     AddToStartup();
 
     // Set up mouse hook
     HHOOK mouseHook = SetWindowsHookEx(WH_MOUSE_LL, LowLevelMouseProc, NULL, 0);
     if (mouseHook == NULL) {
         MessageBoxA(NULL, "Failed to set the mouse hook!", "Error", MB_ICONERROR);
-        Shell_NotifyIcon(NIM_DELETE, &nid);
+        DestroyWindow(hWnd);
         return 1;
     }
 
@@ -466,7 +479,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
     // Cleanup
     setMouseSpeed(state.originalMouseSpeed);
     UnhookWindowsHookEx(mouseHook);
-    Shell_NotifyIcon(NIM_DELETE, &nid);
 
     return 0;
 }

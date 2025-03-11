@@ -7,7 +7,7 @@ if errorlevel 1 (
     exit /b 1
 )
 
-g++ main.cpp resource.res -o .\Release\MouseGestures.exe -mwindows
+g++ main.cpp resource.res -o .\Release\BetterMouse.exe -mwindows
 if errorlevel 1 (
     echo Error: Failed to compile executable
     exit /b 1

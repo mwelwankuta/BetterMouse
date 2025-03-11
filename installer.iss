@@ -1,9 +1,9 @@
-#define MyAppName "Mouse Gestures"
-#define MyAppVersion "1.7.2"
-#define MyAppPublisher "Mouse Gestures"
-#define MyAppURL "https://github.com/your-username/mouse-gestures"
-#define MyAppExeName "MouseGestures.exe"
-#define MyServiceName "MouseGesturesService"
+#define MyAppName "Better Mouse"
+#define MyAppVersion "1.7.3"
+#define MyAppPublisher "Mwelwa Nkuta"
+#define MyAppURL "https://github.com/mwelwankuta/better-mouse"
+#define MyAppExeName "BetterMouse.exe"
+#define MyServiceName "BetterMouseService"
 
 [Setup]
 ; NOTE: The value of AppId uniquely identifies this application.
@@ -17,7 +17,7 @@ AppUpdatesURL={#MyAppURL}
 DefaultDirName={commonpf}\{#MyAppName}
 DefaultGroupName={#MyAppName}
 OutputDir=Release
-OutputBaseFilename=MouseGestures_Setup_{#MyAppVersion}
+OutputBaseFilename=BetterMouse_Installer_{#MyAppVersion}
 SetupIconFile=app.ico
 Compression=lzma
 SolidCompression=yes
@@ -65,8 +65,8 @@ procedure InitializeWizard;
 begin
   // Create custom page for service installation option
   ServicePage := CreateInputOptionPage(wpSelectTasks,
-    'Installation Type', 'Choose how you want to install Mouse Gestures',
-    'Please select whether you want to install Mouse Gestures as a Windows Service or as a normal application.',
+    'Installation Type', 'Choose how you want to install Better Mouse',
+    'Please select whether you want to install Better Mouse as a Windows Service or as a normal application.',
     True, False);
   ServicePage.Add('Install as Windows Service (runs at startup)');
   ServicePage.Add('Install as normal application (runs when launched)');
