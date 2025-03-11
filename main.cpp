@@ -15,7 +15,7 @@ WNDCLASSEX wc = {};
 HWND hWnd;
 
 // Configuration
-const int MOVEMENT_THRESHOLD = 10;      // Minimum pixels to trigger horizontal actions
+const int MOVEMENT_THRESHOLD = 2;       // Changed from 10 to 5 to match vertical sensitivity
 const int VERTICAL_THRESHOLD = 5;       // More sensitive threshold for up/down actions
 const int CURSOR_MOVE_STEPS = 20;       // Number of steps for smooth cursor movement
 const int CURSOR_MOVE_DELAY = 1;        // Milliseconds between each cursor movement step
@@ -236,9 +236,9 @@ void handleMouseMovement(const POINT& currentPos) {
     int deltaX = currentPos.x - state.initialPos.x;
     int deltaY = currentPos.y - state.initialPos.y;
 
-    // Use different thresholds for horizontal and vertical movements
-    bool horizontalThresholdMet = abs(deltaX) > MOVEMENT_THRESHOLD;
-    bool verticalThresholdMet = abs(deltaY) > VERTICAL_THRESHOLD;
+    // Use same threshold for both horizontal and vertical movements
+    bool horizontalThresholdMet = std::abs(deltaX) > MOVEMENT_THRESHOLD;
+    bool verticalThresholdMet = std::abs(deltaY) > VERTICAL_THRESHOLD;
 
     // Only trigger if movement exceeds threshold
     if (horizontalThresholdMet || verticalThresholdMet) {
@@ -246,14 +246,15 @@ void handleMouseMovement(const POINT& currentPos) {
         state.lastPos = currentPos;
         
         // Determine primary direction of movement
-        if (horizontalThresholdMet && abs(deltaX) > abs(deltaY)) {
+        // Changed to be more responsive to horizontal movement by checking it first
+        if (horizontalThresholdMet) {
             // Horizontal movement
             if (deltaX > 0) {
                 performVirtualDesktopSwitch(false);  // Moving right now triggers Left
             } else {
                 performVirtualDesktopSwitch(true);   // Moving left now triggers Right
             }
-        } else {
+        } else if (verticalThresholdMet) {
             // Vertical movement
             if (deltaY > 0) {
                 performShowDesktopOrWindowsTab();  // Down
