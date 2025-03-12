@@ -2,13 +2,15 @@
 
 A Windows application that provides mouse gesture functionality for quick navigation between windows, virtual desktops, and more.
 
+<video width="450" controls>
+  <source src="video.mov" type="video/mp4">
+</video>
+
 ## Features
 
 - Mouse gesture support using Mouse Button 5 (XButton2)
 - System tray icon with settings and about menu
-- Can run as a normal application or Windows service
-- Professional installer with options for service or normal installation
-- Automatic startup support
+- Automatic startup support as a windows service
 - Gesture actions:
   - Horizontal movement: Switch virtual desktops
   - Vertical movement up: Windows Tab view
@@ -19,7 +21,7 @@ A Windows application that provides mouse gesture functionality for quick naviga
 
 ### Using the Installer (Recommended)
 
-1. Download the latest `MouseGestures_Setup_1.0.0.exe` from the releases page
+1. Download the latest `MouseGestures_Installer.exe` from the releases page
 2. Run the installer as Administrator
 3. Choose your installation options:
    - Install as Windows Service (runs at startup)
@@ -33,10 +35,9 @@ A Windows application that provides mouse gesture functionality for quick naviga
 
 If you prefer not to use the installer:
 
-1. Download the ZIP file from the releases page
+1. Download the exe file from the releases page
 2. Extract to your preferred location
-3. Run `MouseGestures.exe` directly
-4. Optionally, run `install_service.bat install` as Administrator to install as a service
+3. Run `BetterMouse.exe` directly
 
 ## Usage
 
@@ -47,6 +48,10 @@ If you prefer not to use the installer:
    - Move mouse down to show desktop or Windows Tab
    - Use mouse wheel to Alt+Tab between windows
 3. Release Mouse Button 5 to complete the gesture
+
+Reference below to locate Mouse Button 5
+
+![](./README.png)
 
 ## System Requirements
 
