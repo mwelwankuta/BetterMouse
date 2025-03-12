@@ -1,5 +1,5 @@
 #define MyAppName "Better Mouse"
-#define MyAppVersion "1.7.3"
+#define MyAppVersion "1.7.4"
 #define MyAppPublisher "Mwelwa Nkuta"
 #define MyAppURL "https://github.com/mwelwankuta/better-mouse"
 #define MyAppExeName "BetterMouse.exe"

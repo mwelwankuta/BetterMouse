@@ -15,7 +15,7 @@ WNDCLASSEX wc = {};
 HWND hWnd;
 
 // Configuration
-const int MOVEMENT_THRESHOLD = 2;       // Changed from 10 to 5 to match vertical sensitivity
+const int MOVEMENT_THRESHOLD = 2;       // vertical sensitivity
 const int VERTICAL_THRESHOLD = 5;       // More sensitive threshold for up/down actions
 const int CURSOR_MOVE_STEPS = 20;       // Number of steps for smooth cursor movement
 const int CURSOR_MOVE_DELAY = 1;        // Milliseconds between each cursor movement step
