@@ -2,9 +2,8 @@
 
 A Windows application that provides mouse gesture functionality for quick navigation between windows, virtual desktops, and more.
 
-<video width="450" controls>
-  <source src="video.mov" type="video/mp4">
-</video>
+
+https://github.com/user-attachments/assets/115bbf23-2605-4138-a97a-3d3c93e54d23
 
 ## Features
 
