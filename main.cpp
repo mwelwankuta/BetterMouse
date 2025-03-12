@@ -449,13 +449,20 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
 
 // Windows entry point
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) {
+    // Create a mutex to ensure only one instance of the application runs
+    HANDLE hMutex = CreateMutex(NULL, TRUE, TEXT("MouseGesturesMutex"));
+    if (GetLastError() == ERROR_ALREADY_EXISTS) {
+        // If the mutex already exists, another instance is running
+        return 1;
+    }
+
     // Create hidden window and system tray icon
     hWnd = CreateHiddenWindow(hInstance);
     if (!hWnd) {
         MessageBoxA(NULL, "Failed to create window!", "Error", MB_ICONERROR);
         return 1;
     }
-    
+
     AddToStartup();
 
     // Set up mouse hook
@@ -479,6 +486,10 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
     // Cleanup
     setMouseSpeed(state.originalMouseSpeed);
     UnhookWindowsHookEx(mouseHook);
+
+    // Release the mutex
+    ReleaseMutex(hMutex);
+    CloseHandle(hMutex);
 
     return 0;
 }
